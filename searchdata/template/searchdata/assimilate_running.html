@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>Assimlilate Running status</title>
+   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+   <link rel="stylesheet" href="https://cdn.datatables.net/v/dt/dt-1.10.12/se-1.2.0/datatables.min.css">
+   <link rel="stylesheet" href="https://gyrocode.github.io/jquery-datatables-checkboxes/1.2.7/css/dataTables.checkboxes.css"/>
+   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.9/css/all.css" integrity="sha384-5SOiIsAziJl6AWe0HWRKTXlfcSHKmYV4RBF18PPJ173Kzn7jzMyFuTtk8JA7QQG1" crossorigin="anonymous">
+
+
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1> Unquarantine Services</h1>
+            <hr/>
+         </div>
+      </div>
+      <div class="row">
+         <div class="col-md-12">
+            <div class="card text-center">
+              <div class="card-header">
+                  <ul class="nav nav-tabs card-header-tabs">
+                    <li class="nav-item">
+                       <a class="nav-link" href="/search_quarantine" id="machine_list_tab">Machine List</a>
+                     </li>
+                     <li class="nav-item">
+                       <a class="nav-link active" href="#" id="unquarantine_factory_tab">Assimilate Running status</a>
+                     </li>
+                   </ul>
+               </div>
+              </div>
+              <div class="card-body">
+                  <div id="unquarantine_factory_content">
+                   <table id="assimilate_running_status" class="display" cellspacing="0" width="100%">
+                     <thead>
+                        <tr>
+                           <th>Hostname</th>
+                           <th>Start time</th>
+                           <th>Assimil status</th>
+                           <th>Assimilate Error</th>
+                           <th>Remidiator</th>
+                           <th>Remidiator Error</th>
+                        </tr>
+                       </thead>
+                       <tfoot>
+                       <!--  <tr>
+                           <th>Hostname</th>
+                           <th>Start time</th>
+                           <th>Assimil status</th>
+                           <th>Assimilate Error</th>
+                           <th>Remidiator</th>
+                           <th>Remidiator Error</th>
+                        </tr> -->
+                     </tfoot>
+
+                    </table>
+               </div>
+              </div>
+              <div class="card-footer text-muted ">
+                <!-- <button class="btn btn-info float-right machine_list_btn">RUN ASSIMILATOR</button> -->
+              </div>
+            </div>
+
+         </div>
+      </div>
+   </div>
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+   <script src="https://cdn.datatables.net/v/dt/dt-1.10.12/se-1.2.0/datatables.min.js"></script>
+   <script src="https://gyrocode.github.io/jquery-datatables-checkboxes/1.2.7/js/dataTables.checkboxes.min.js"></script>
+   <script type="text/javascript">
+    $(document).ready(function() {
+//     var myvar='';
+//      $.ajax({
+//     type: 'GET',
+//     url: '/assmililate_status_json/',
+//     success: function(data) {
+//            useReturnData(data);
+//         },
+//     error: function(jqXHR, textStatus, errorThrown) {
+//             alert(jqXHR.status);
+//         }
+//     });
+
+//      function useReturnData(data){
+//         // var machine_details =JSON.parse(data);
+//         // console.log(machine_details.length)
+//     // var myvar = data;
+//     // var ttt = $('#assimilate_status');
+//     // for (var i=1; i < machine_details.length; i++){
+
+// $.each($.parseJSON(data), function(key,value){
+//     value.dns_name =
+
+//     }
+//     // console.log(Object.keys(data).size());
+
+// };
+
+$('#assimilate_running_status').DataTable({
+      // 'ajax': '/assmililate_status_json/',
+        "ajax": {
+    "url": "/assmililate_status_json/",
+    "dataSrc": "",
+  },
+      "columns": [
+         { "data": "dns_name" },
+         { "data": "ran_date" },
+         { "data": "assimilate_status" },
+         { "data": "assimilate_error" },
+         { "data": "remeditor_status"},
+         { "data": "remeditor_error"}
+         ],
+      'select': {
+         'style': 'multi'
+      },
+      'order': [[1, 'asc']],
+      "createdRow": function ( row, data, index ) {
+
+            if(data['assimilate_status'] == "running"){
+
+                $('td', row).eq(2).html('<i class="fas fa-spinner fa-pulse fa-lg"></i>');
+            }
+            else if (data['assimilate_status'] == "Good"){
+
+                $('td', row).eq(2).html('<i class="fas fa-check-circle fa-lg"></i>');
+            }
+             else {
+
+            $('td', row).eq(2).html('<i class="fas fa-times-circle fa-lg" style="color:Tomato"></i>');
+          }
+
+          if(data['remeditor_status'] == "running"){
+
+                $('td', row).eq(4).html('<i class="fas fa-spinner fa-pulse fa-lg"></i>');
+            }
+            else if (data['remeditor_status'] == "Good"){
+
+                $('td', row).eq(4).html('<i class="fas fa-check-circle fa-lg"></i>');
+            }
+             else if (data['remeditor_status'] == "NotGood"){
+
+            $('td', row).eq(4).html('<i class="fas fa-times-circle fa-lg" style="color:Tomato"></i>');
+          }
+          else {
+
+            $('td', row).eq(4).html('<i class="" style=""></i>');
+          }
+
+}
+   });
+});
+
+
+</script>
+</body>
+</html>

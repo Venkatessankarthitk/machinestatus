@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Unquratine Services</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+	<link rel="stylesheet" href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css"/>
+</head>
+<body>
+
+    
+<form id="frm-example" >
+    
+<table id="machinesTable" class="display" cellspacing="0" width="100%">
+   <thead>
+      <tr>
+          <th><input name="select_all" value="1" id="machinesTable-select-all" type="checkbox" /></th>
+         <th>Hostname</th>
+         <th>Status</th>
+         <th>Type</th>
+      </tr>
+   </thead>
+   <tfoot>
+      <tr>
+         <th></th>
+        <th>Hostname</th>
+         <th>Status</th>
+         <th>Type</th>
+      </tr>
+   </tfoot>
+</table>
+<hr>
+
+<p>Press <b>Submit</b> and check console for URL-encoded form data that would be submitted.</p>
+
+<p><button>Submit</button></p>
+
+<pre id="example-console">
+</pre>
+</form>
+	<script
+	src="https://code.jquery.com/jquery-3.3.1.min.js"
+	integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+	crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+	<script type="text/javascript" src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+
+	<script type="text/javascript">
+	var col_selected = [];
+		$(document).ready(function (){ 
+   var table = $('#machinesTable').DataTable({
+      'ajax': '/machines',
+      "dataSrc": function (json) {
+      var return_data = new Array();
+      for(var i=0;i< json.length; i++){
+        return_data.push({
+          'hostname': json[i].hostname,
+          'status'  : json[i].status,
+          'type' : json[i].type
+        })
+      }
+      return return_data;
+      },  
+      'columnDefs': [{
+         'targets': 0,
+         'searchable':false,
+         'orderable':false,
+         'select':true,
+         'className': 'dt-body-center',
+         'render': function (data, type, full, meta){
+             return '<input type="checkbox" name="id[]" value="' 
+                + $('<div/>').text(data).html() + '">';
+         }
+      }],"columns": [
+			{ "data": "hostname" },
+			{ "data": "hostname" },
+			{ "data": "status" },
+			{ "data": "type" },
+			],
+      'order': [1, 'asc']
+   });
+
+   // Handle click on "Select all" control
+   $('#machinesTable-select-all').on('click', function(){
+      // Check/uncheck all checkboxes in the table
+      var rows = table.rows({ 'search': 'applied' }).nodes();
+      $('input[type="checkbox"]', rows).prop('checked', this.checked);
+   });
+
+   // Handle click on checkbox to set state of "Select all" control
+
+   $('#machinesTable tbody').on('change', 'input[type="checkbox"]', function(e){
+      // If checkbox is not checked
+      var sdata = table.cell('.selected', 0).data();
+		var ids = $("#machinesTable tr:has(input:checked)").map(function() {
+		var $tr = $(this);
+		var id = $tr.find("td:eq(2)").text();
+		alert(id)
+		return id;
+		}).toArray();
+		// alert('ids == '+ids)
+
+
+      // var selectedRows = table.rows( { selected: true } ).count();
+      // alert(selectedRows)
+      if(!this.checked){
+         var el = $('#machinesTable-select-all').get(0);
+         // If "Select all" control is checked and has 'indeterminate' property
+         if(el && el.checked && ('indeterminate' in el)){
+            // Set visual state of "Select all" control 
+            // as 'indeterminate'
+            el.indeterminate = true;
+         }
+      }
+   });
+   
+   $('#frm-example').on('submit', function(e){
+      var form = this;
+		
+      // Iterate over all checkboxes in the table
+      table.$('input[type="checkbox"]').each(function(){
+         // If checkbox doesn't exist in DOM
+         if(!$.contains(document, this)){
+            // If checkbox is checked
+            if(this.checked){
+               // Create a hidden element 
+               // return this.value + '=name = '+ this.name;
+               $(form).append(
+                  $('<input>')
+                     .attr('type', 'hidden')
+                     .attr('name', this.name)
+                     .val(this.value)
+               );
+
+            }
+         } 
+      });
+   //    alert(rows_selected)
+	  // var rows_selected = table.column(0).checkboxes.selected();
+	  // alert(rows_selected.join(","))
+      // FOR TESTING ONLY
+      
+      // Output form data to a console
+      var value = $(form).serialize();
+      alert(value);
+      $('#example-console').text($(form).serialize()); 
+      console.log("Form submission", $(form).serialize()); 
+    
+      // Prevent actual form submission
+      e.preventDefault();
+   });
+});
+	</script>
+</body>
+</html>

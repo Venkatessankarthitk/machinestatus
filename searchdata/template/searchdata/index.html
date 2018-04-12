@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Unquratine Services</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+	<link rel="stylesheet" href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css"/>
+</head>
+<body>
+
+	<form id="frm-example" name="frm-example">
+		<table id="machinesTable" class="table">
+			<thead>
+				<tr>
+					<th><input name="select_all" value="1" type="checkbox"></th>
+					<th scope="col">Hostname</th>
+					<th scope="col">Status</th>
+					<th sce="col">Type</th>
+				</tr>
+			</thead>
+			<tfoot>
+				<tr>
+					<th></th>
+					<th scope="col">Hostname</th>
+					<th scope="col">Status</th>
+					<th scope="col">Type</th>
+				</tr>
+			</tfoot>
+		</table>
+		<button class="btn btn-success" type="submit">RUN</button>
+		<p class="form-group">
+			<pre id="example-console"></pre>
+		</p>
+	</form>
+	<script
+	src="https://code.jquery.com/jquery-3.3.1.min.js"
+	integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+	crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-typeahead/2.10.4/jquery.typeahead.min.js" integrity="sha256-b5MxNl2oj9DaD3wBVcYbNKWWwRrSwmBidi9St59Awu4=" crossorigin="anonymous"></script> -->
+	<script type="text/javascript" src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+
+	<script type="text/javascript">
+
+	
+	function updateDataTableSelectAllCtrl(table){
+	   var $table             = table.table().node();
+	   var $chkbox_all        = $('tbody input[type="checkbox"]', $table);
+	   var $chkbox_checked    = $('tbody input[type="checkbox"]:checked', $table);
+	   var chkbox_select_all  = $('thead input[name="select_all"]', $table).get(0);
+
+	   // If none of the checkboxes are checked
+	   if($chkbox_checked.length === 0){
+	      chkbox_select_all.checked = false;
+	      if('indeterminate' in chkbox_select_all){
+	         chkbox_select_all.indeterminate = false;
+	      }
+
+	   // If all of the checkboxes are checked
+	   } else if ($chkbox_checked.length === $chkbox_all.length){
+	      chkbox_select_all.checked = true;
+	      if('indeterminate' in chkbox_select_all){
+	         chkbox_select_all.indeterminate = false;
+	      }
+
+	   // If some of the checkboxes are checked
+	   } else {
+	      chkbox_select_all.checked = true;
+	      if('indeterminate' in chkbox_select_all){
+	         chkbox_select_all.indeterminate = true;
+	      }
+	   }
+	}
+
+
+$(document).ready( function () {
+	var rows_selected = [];
+	var checked_hostname = [];
+	var table = $('#machinesTable').DataTable({
+		"ajax": {
+			"url": "/machines"
+		},
+		"processing": true,
+		'columnDefs': [{
+         'targets': 0,
+         'searchable':false,
+         'orderable':false,
+         'width':'1%',
+       	 'className': 'select-checkbox',
+         'render': function (data, type, full, meta){
+             return '<input type="checkbox" name="name[]" value="' 
+                + $('<div/>').text(data).html() + '">';
+         }
+	      }],
+			"columns": [
+			{ "data": "hostname" },
+			{ "data": "hostname" },
+			{ "data": "status" },
+			{ "data": "type" },
+			],
+	 	});
+	$('#machinesTable tbody').on('click', 'input[type="checkbox"]', function(e){
+      var $row = $(this).closest('tr');
+      
+      // Get row data
+      var data = table.row($row).data();
+
+      // Get row ID
+      var rowId = data[0];
+
+      // Determine whether row ID is in the list of selected row IDs 
+      var index = $.inArray(rowId, rows_selected);
+
+      // If checkbox is checked and row ID is not in list of selected row IDs
+      if(this.checked && index === -1){
+         rows_selected.push(rowId);
+
+      // Otherwise, if checkbox is not checked and row ID is in list of selected row IDs
+      } else if (!this.checked && index !== -1){
+         rows_selected.splice(index, 1);
+      }
+
+      if(this.checked){
+         $row.addClass('selected');
+      } else {
+         $row.removeClass('selected');
+      }
+
+      // Update state of "Select all" control
+      updateDataTableSelectAllCtrl(table);
+  
+ //      var ids = $("#machinesTable tr:has(input:checked)").map(function() {
+	// 	var $tr = $(this);
+	// 	var id = $tr.find("td:eq(1)").text();
+	// 	rows_selected.push(id);
+	// 	return id;
+	// }).toArray();
+ //    checked_hostname = [];
+	// $.each(rows_selected, function(i, el){
+	//     if($.inArray(el, checked_hostname) === -1) checked_hostname.push(el);
+	// });
+
+      // Prevent click event from propagating to parent
+      e.stopPropagation();
+   });
+
+
+	$('#machinesTable').on('click', 'tbody td, thead th:first-child', function(e){
+	      $(this).parent().find('input[type="checkbox"]').trigger('click');
+	   });
+
+	// $('thead input[name="select_all"]', table.table().container()).on('click', function(e){
+	//       if(this.checked){
+	//          $('#machinesTable tbody input[type="checkbox"]:not(:checked)').trigger('click');
+	//       } else {
+	//          $('#machinesTable tbody input[type="checkbox"]:checked').trigger('click');
+	//       }
+
+	//       // Prevent click event from propagating to parent
+	//       e.stopPropagation();
+	//    });
+
+$('#machinesTable-select-all').on('click', function(){
+      // Check/uncheck all checkboxes in the table
+      var rows = table.rows({ 'search': 'applied' }).nodes();
+      $('input[type="checkbox"]', rows).prop('checked', this.checked);
+   });
+   // Handle table draw event
+   table.on('draw', function(){
+      // Update state of "Select all" control
+      updateDataTableSelectAllCtrl(table);
+   });
+
+
+
+  $('#frm-example').on('submit', function(e){
+      var form = this;
+
+	var $table= table.table().node();
+ 	var $chkbox_checked = $('tbody input[type="checkbox"]:checked', $table);
+
+
+	// var ids = $("#machinesTable tr:has(input:checked)").map(function() {
+	// 	var $tr = $(this);
+	// 	var id = $tr.find("td:eq(1)").text();
+	// 	return id;
+	// }).toArray();
+	// alert(checked_hostname.join(", "));
+	// alert(rows_selected.join(","))
+
+      // Iterate over all selected checkboxes
+      $.each(rows_selected, function(index, rowId){
+         // Create a hidden element 
+         $(form).append(
+             $('<input>')
+                .attr('type', 'hidden')
+                .attr('hostname', this.value)
+                .val(this.name)
+         );
+
+      });
+
+
+      // FOR DEMONSTRATION ONLY     
+      
+      // // Output form data to a console     
+      // $('#example-console').text($(form).serialize());
+	     //  console.log("Form submission", $(form).serialize());
+	       
+	     //  // Remove added elements
+	     //  $('input[name="hostname\[\]"]', form).remove();
+	       
+	     //  // Prevent actual form submission
+	      e.preventDefault();
+   });
+});
+
+
+
+	// $(".table").on('keyup','thead th input',function(){    	    	
+	// 	table
+	// 	.column( $(this).data('index') )
+	// 	.search( this.value )
+	// 	.draw();
+	// });
+
+	// $('#machinesTable tbody').on('click', 'input[type="checkbox"]', function(e){
+	// 	var $row = $(this).closest('tr');
+
+ //      // Get row data
+ //      var data = table.row($row).data();
+
+ //      // Get row ID
+ //      var rowId = data[0];
+
+ //      // Determine whether row ID is in the list of selected row IDs
+ //      var index = $.inArray(rowId, rows_selected);
+
+ //      // If checkbox is checked and row ID is not in list of selected row IDs
+ //      if(this.checked && index === -1){
+ //      	rows_selected.push(rowId);
+
+ //      // Otherwise, if checkbox is not checked and row ID is in list of selected row IDs
+ //  } else if (!this.checked && index !== -1){
+ //  	rows_selected.splice(index, 1);
+ //  }
+
+ //  if(this.checked){
+ //  	$row.addClass('selected');
+ //  } else {
+ //  	$row.removeClass('selected');
+ //  }
+
+ //      // Update state of "Select all" control
+ //      updateDataTableSelectAllCtrl(table);
+
+ //      // Prevent click event from propagating to parent
+ //      e.stopPropagation();
+ //  });
+	// $('#machinesTable').on('click', 'tbody td, thead th:first-child', function(e){
+	// 	$(this).parent().find('input[type="checkbox"]').trigger('click');
+	// });
+
+	// $('thead input[name="select_all"]', table.table().container()).on('click', function(e){
+	// 	if(this.checked){
+	// 		$('#machinesTable tbody input[type="checkbox"]:not(:checked)').trigger('click');
+	// 	} else {
+	// 		$('#machinesTable tbody input[type="checkbox"]:checked').trigger('click');
+	// 	}
+
+ //      // Prevent click event from propagating to parent
+ //      e.stopPropagation();
+ //  });
+
+	// table.on('draw', function(){
+ //      // Update state of "Select all" control
+ //      updateDataTableSelectAllCtrl(table);
+ //  });
+
+	// $('#frm-example').on('submit', function(e){
+	// 	var form = this;
+
+ //      // Iterate over all selected checkboxes
+ //      $.each(rows_selected, function(index, rowId){
+ //         // Create a hidden element
+ //         $(form).append(
+ //         	$('<input>')
+ //         	.attr('type', 'hidden')
+ //         	.attr('name', 'id[]')
+ //         	.val(rowId)
+ //         	);
+ //     });
+ //  });
+
+
+</script>
+</body>
+</html>

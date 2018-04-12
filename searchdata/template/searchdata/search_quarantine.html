@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>Unquratine Services</title>
+   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+   <link rel="stylesheet" href="https://cdn.datatables.net/v/dt/dt-1.10.12/se-1.2.0/datatables.min.css">
+   <link rel="stylesheet" href="https://gyrocode.github.io/jquery-datatables-checkboxes/1.2.7/css/dataTables.checkboxes.css"/>
+</head>
+<body>
+
+   <div class="container">
+      <div class="row">
+         <div class="col-md-12">
+            <h1> Unquarantine Services</h1>
+            <hr/>
+         </div>
+      </div>
+      <div class="row">
+         <div class="col-md-12">
+            <div class="card text-center">
+              <div class="card-header">
+                  <ul class="nav nav-tabs card-header-tabs">
+                     <li class="nav-item">
+                       <a class="nav-link active" href="#" id="machine_list_tab">Machine List</a>
+                     </li>
+
+                     <li class="nav-item">
+                       <a class="nav-link" href="/assmililate_running" id="unquarantine_factory_tab">assmililate running status</a>
+                     </li>
+                   </ul>
+               </div>
+              </div>
+              <div class="card-body">
+                  <div id="machines_list_content">
+                   <table id="machines_list_table" class="display" cellspacing="0" width="100%">
+                     <thead>
+                        <tr>
+                           <th></th>
+                           <th>Hostname</th>
+                           <th>Status</th>
+                           <th>Type</th>
+                           <th>Reason</th>
+                        </tr>
+                     </thead>
+                     <tfoot>
+                        <tr>
+                           <th></th>
+                           <th>Hostname</th>
+                           <th>Status</th>
+                           <th>Type</th>
+                           <th>Reason</th>
+                        </tr>
+                     </tfoot>
+                  </table>
+               </div>
+              </div>
+              <div class="card-footer text-muted ">
+                <button class="btn btn-info float-right machine_list_btn">RUN ASSIMILATOR</button>
+              </div>
+            </div>
+
+         </div>
+      </div>
+   </div>
+   {% csrf_token %}
+
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+   <script src="https://cdn.datatables.net/v/dt/dt-1.10.12/se-1.2.0/datatables.min.js"></script>
+   <script src="https://gyrocode.github.io/jquery-datatables-checkboxes/1.2.7/js/dataTables.checkboxes.min.js"></script>
+   <script type="text/javascript">
+
+   $(document).ready(function() {
+   var table = $('#machines_list_table').DataTable({
+      'ajax': {
+
+        'url' : 'http://127.0.0.1/machine/api/machines/attributes/',
+        "type": "GET",
+        'dataType' : 'json',
+        "dataSrc": "",
+        "cache" : true
+      },
+      'columnDefs': [
+         {
+            'targets': 0,
+            'checkboxes': {
+               'selectRow': true
+            },
+         },
+         {
+            'targets': 4,
+            "defaultContent": "-"
+         }
+      ],
+      "columns": [
+         { "data": "hostname" },
+         { "data": "hostname" },
+         { "data": "status" },
+         { "data": "type" },
+         { "data": "quarantine_reason"}
+         ],
+      'select': {
+         'style': 'multi',
+      },
+      'order': [[1, 'asc']]
+   });
+
+
+   $('.machine_list_btn').on('click', function(e){
+
+      // var form = this;
+      var rows_selected = table.column(0).checkboxes.selected();
+      var machine_list = $.each(rows_selected, function(index, rowId){
+         return rowId;
+      });
+
+      machines = []
+
+      $.each(machine_list, function(index, machine_value){
+         machines.push(machine_value);
+      });
+
+      $.ajax({
+            type: "POST",
+            url: "/start_assimilate/",
+            data: {
+               'hostname' : machines,
+               '_token': $('input[name="csrfmiddlewaretoken"]').val()
+            },
+            success: function (result) {
+               console.log("success",result);
+               alert(result)
+            }
+      });
+
+      window.location.href = '/assmililate_running' ;
+      e.preventDefault();
+   });
+
+
+});
+   </script>
+</body>
+</html>

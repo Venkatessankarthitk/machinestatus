@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>Unquratine Services</title>
+   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+   <link rel="stylesheet" href="https://cdn.datatables.net/v/dt/dt-1.10.12/se-1.2.0/datatables.min.css">
+   <link rel="stylesheet" href="https://gyrocode.github.io/jquery-datatables-checkboxes/1.2.7/css/dataTables.checkboxes.css"/>
+   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.9/css/all.css" integrity="sha384-5SOiIsAziJl6AWe0HWRKTXlfcSHKmYV4RBF18PPJ173Kzn7jzMyFuTtk8JA7QQG1" crossorigin="anonymous">
+
+
+</head>
+<body>
+
+   <div class="container">
+      <div class="row">
+         <div class="col-md-12">
+            <h1> Unquarantine Services <small class="text-muted">(POC) (Beta)</small></h1>
+            <hr/>
+         </div>
+      </div>
+      <div class="row">
+         <div class="col-md-12">
+            <div class="card text-center">
+              <div class="card-header">
+                  <ul class="nav nav-tabs card-header-tabs">
+                     <li class="nav-item">
+                       <a class="nav-link" href="/search_quarantine" id="machine_list_tab">Machine List</a>
+                     </li>
+                     <li class="nav-item">
+                       <a class="nav-link active" href="#" id="unquarantine_factory_tab">Unquarantine Factory</a>
+                     </li>
+                     <li class="nav-item">
+                       <a class="nav-link" href="/assmililate_running" id="unquarantine_factory_tab">Unquarantine Factory</a>
+                     </li>
+                   </ul>
+               </div>
+              </div>
+              <div class="card-body">
+                  <div id="unquarantine_factory_content">
+                   <table id="unquarantine_factory_table" class="display" cellspacing="0" width="100%">
+                     <thead>
+                        <tr>
+                           <th>Hostname</th>
+                           <th>Assimiliator</th>
+                           <th>Remidiator</th>
+                           <th>Report</th>
+                        </tr>
+                     </thead>
+                     <tfoot>
+                        <tr>
+                           <th>Hostname</th>
+                           <th>Assimiliator</th>
+                           <th>Remidiator</th>
+                           <th>Report</th>
+                        </tr>
+                     </tfoot>
+                  </table>
+               </div>
+              </div>
+              <div class="card-footer text-muted ">
+                <!-- <button class="btn btn-info float-right machine_list_btn">RUN ASSIMILATOR</button> -->
+              </div>
+            </div>
+
+         </div>
+      </div>
+   </div>
+
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+   <script src="https://cdn.datatables.net/v/dt/dt-1.10.12/se-1.2.0/datatables.min.js"></script>
+   <script src="https://gyrocode.github.io/jquery-datatables-checkboxes/1.2.7/js/dataTables.checkboxes.min.js"></script>
+   <script type="text/javascript">
+
+   $(document).ready(function() {
+   var table = $('#unquarantine_factory_table').DataTable({
+      'data':JSON.parse(localStorage.getItem('machine')),
+      'columnDefs': [
+         {
+            'targets': [1,2,3],
+            "defaultContent": "-"
+         }
+      ],
+      "columns": [
+         { "data": "hostname" },
+         { "data": "assimilate" },
+         { "data": "remidiate" },
+         { "data": "report"}
+         ],
+      'select': {
+         'style': 'multi'
+      },
+      'order': [[1, 'asc']],
+      "createdRow": function ( row, data, index ) {
+
+          if (data['assimilate']) {
+
+            if(data['assimilate'] == "progress"){
+
+                $('td', row).eq(1).html('<i class="fas fa-spinner fa-pulse fa-lg"></i>');
+            }
+            else{
+
+                $('td', row).eq(1).html('<i class="fas fa-check-circle fa-lg"></i>');
+            }
+
+
+          }
+          else {
+
+            $('td', row).eq(1).html('<i class="fas fa-times-circle fa-lg" style="color:Tomato"></i>');
+          }
+
+          if (data['remidiate']) {
+
+            if(data['remidiate'] == "progress"){
+
+                $('td', row).eq(2).html('<i class="fas fa-spinner fa-pulse fa-lg"></i>');
+            }
+            else{
+
+                $('td', row).eq(2).html('<i class="fas fa-check-circle fa-lg"></i>');
+            }
+          }
+          else {
+
+            $('td', row).eq(2).html('<i class="fas fa-times-circle fa-lg" style="color:Tomato"></i>');
+          }
+
+          if (data['report']) {
+
+
+            if(data['report'] == "progress"){
+
+                $('td', row).eq(3).html('<i class="fas fa-spinner fa-pulse fa-lg"></i>');
+            }
+            else{
+
+                $('td', row).eq(3).html('<i class="fas fa-check-circle fa-lg"></i>');
+            }
+          }
+          else {
+
+            $('td', row).eq(3).html('<i class="fas fa-times-circle fa-lg" style="color:Tomato"></i>');
+          }
+      }
+   });
+
+
+
+   // $('.machine_list_btn').on('click', function(e){
+
+   //    var form = this;
+   //    var rows_selected = table.column(0).checkboxes.selected();
+   //    var machine_list = $.each(rows_selected, function(index, rowId){
+   //       return rowId;
+   //    });
+
+   //    localStorage.setItem('machine',machine_list.join(","))
+
+   //    console.log(machine_list);
+   //    window.location.href = '/unquarantine_factory' ;
+
+   //    e.preventDefault();
+   // });
+
+
+});
+   </script>
+</body>
+</html>
